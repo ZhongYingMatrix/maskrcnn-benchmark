@@ -207,12 +207,12 @@ class COCODemo(object):
         result = image.copy()
         if self.show_mask_heatmaps:
             return self.create_mask_montage(result, top_predictions)
-        result = self.overlay_boxes(result, top_predictions)
+        #result = self.overlay_boxes(result, top_predictions)
         if self.cfg.MODEL.MASK_ON:
             result = self.overlay_mask(result, top_predictions)
         if self.cfg.MODEL.KEYPOINT_ON:
             result = self.overlay_keypoints(result, top_predictions)
-        result = self.overlay_class_names(result, top_predictions)
+        #result = self.overlay_class_names(result, top_predictions)
 
         return result
 
@@ -320,12 +320,18 @@ class COCODemo(object):
 
         colors = self.compute_colors_for_labels(labels).tolist()
 
+        image = image.astype(float)
         for mask, color in zip(masks, colors):
             thresh = mask[0, :, :, None]
             contours, hierarchy = cv2_util.findContours(
                 thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
             )
-            image = cv2.drawContours(image, contours, -1, color, 3)
+            image = cv2.drawContours(image, contours, -1, [255,255,255], 1)
+            idx = np.nonzero(thresh[:,:,0])
+            for i in range(3):
+                image[idx[0],idx[1],i] *= 0.6
+                image[idx[0],idx[1],i] += 0.4 * color[i]
+        image = image.astype(int)
 
         composite = image
 
