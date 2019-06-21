@@ -109,6 +109,10 @@ class MaskRCNNLossComputation(object):
         Return:
             mask_loss (Tensor): scalar tensor containing the loss
         """
+        #########################################################################zy debug
+        #import pdb
+        #pdb.set_trace()
+        #########################################################################
         labels, mask_targets = self.prepare_targets(proposals, targets)
 
         labels = cat(labels, dim=0)
@@ -122,10 +126,46 @@ class MaskRCNNLossComputation(object):
         if mask_targets.numel() == 0:
             return mask_logits.sum() * 0
 
-        mask_loss = F.binary_cross_entropy_with_logits(
+        mask_bce_loss = F.binary_cross_entropy_with_logits(
             mask_logits[positive_inds, labels_pos], mask_targets
         )
+
+        mask_dice_loss = binary_dice_loss_with_logits(
+            mask_logits[positive_inds, labels_pos], mask_targets
+        )
+        mask_loss = 0.2 * mask_bce_loss + 0.8 * mask_dice_loss
+
         return mask_loss
+
+def binary_dice_loss_with_logits(mask_logits, mask_targets):
+    r"""Function that measures Binary Dice Loss between target and output
+    logits.
+
+    Args:
+        mask_logits: Tensor of arbitrary shape
+        mask_targets: Tensor of the same shape as input
+
+    Examples::
+
+         >>> input = torch.randn(3, requires_grad=True)
+         >>> target = torch.empty(3).random_(2)
+         >>> loss = binary_dice_loss_with_logits(input, target)
+         >>> loss.backward()
+    """
+    #########################################################################zy debug
+    #import pdb
+    #pdb.set_trace()
+    #########################################################################
+    mask_logits = mask_logits.sigmoid()
+    if not (mask_logits.size() == mask_targets.size()):
+        raise ValueError("Mask_logits size ({}) must be the same as mask_targets size ({})".format(mask_logits.size(), mask_targets.size()))
+    if len(mask_logits.size()) == 3:
+        mask_logits = cat([mask_logits[i] for i in range(mask_logits.size()[0])],dim=0)
+        mask_targets = cat([mask_targets[i] for i in range(mask_targets.size()[0])],dim=0)
+    smooth = 1
+    intersection = (mask_logits.mul(mask_targets)).sum()
+    union = mask_logits.sum() + mask_targets.sum()
+    return 1 - (2. * intersection + smooth) / (union + smooth)
 
 
 def make_roi_mask_loss_evaluator(cfg):
