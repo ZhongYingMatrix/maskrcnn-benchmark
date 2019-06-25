@@ -13,14 +13,16 @@ def get_log(args):
     with open(args.log_file,'r') as f:
         for line in f.readlines():
             line_lst = line.split()
-            if len(line_lst)==39 and line_lst[2] == 'maskrcnn_benchmark.trainer':
-                itr.append(float(line_lst[9]))
-                loss.append(extract_value(line_lst,11))
-                loss_c.append(extract_value(line_lst,14))
-                loss_br.append(extract_value(line_lst,17))
-                loss_m.append(extract_value(line_lst,20))
-                loss_o.append(extract_value(line_lst,23))
-                loss_rbr.append(extract_value(line_lst,26))
+            #if len(line_lst)==39 and line_lst[2] == 'maskrcnn_benchmark.trainer':
+            if len(line_lst)>3 and line_lst[2] == 'maskrcnn_benchmark.trainer' and 'iter:' in line_lst:
+                base_index =  line_lst.index('iter:') + 1
+                itr.append(float(line_lst[base_index]))
+                loss.append(extract_value(line_lst,base_index + 2))
+                loss_c.append(extract_value(line_lst,base_index + 5))
+                loss_br.append(extract_value(line_lst,base_index + 8))
+                loss_m.append(extract_value(line_lst,base_index + 11))
+                loss_o.append(extract_value(line_lst,base_index + 14))
+                loss_rbr.append(extract_value(line_lst,base_index + 17))
     return np.array(itr), np.array(loss), np.array(loss_c), \
         np.array(loss_br), np.array(loss_m), np.array(loss_o), np.array(loss_rbr)
 
