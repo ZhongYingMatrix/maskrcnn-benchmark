@@ -278,7 +278,7 @@ class COCODemo(object):
         """
         Simple function that adds fixed colors depending on the class
         """
-        colors = labels[:, None] * self.palette
+        colors = torch.rand(labels.size())[:,None] * self.palette.type(torch.float32)
         colors = (colors % 255).numpy().astype("uint8")
         return colors
 

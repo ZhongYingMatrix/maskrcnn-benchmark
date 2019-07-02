@@ -43,7 +43,8 @@ def project_masks_on_boxes(segmentation_masks, proposals, discretization_size):
 
 
 class MaskRCNNLossComputation(object):
-    def __init__(self, proposal_matcher, discretization_size):
+    def __init__(self, proposal_matcher, discretization_size, 
+                 use_dice_loss, dice_loss_rate):
         """
         Arguments:
             proposal_matcher (Matcher)
@@ -51,6 +52,8 @@ class MaskRCNNLossComputation(object):
         """
         self.proposal_matcher = proposal_matcher
         self.discretization_size = discretization_size
+        self.use_dice_loss = use_dice_loss
+        self.dice_loss_rate = dice_loss_rate
 
     def match_targets_to_proposals(self, proposal, target):
         match_quality_matrix = boxlist_iou(target, proposal)
@@ -109,6 +112,10 @@ class MaskRCNNLossComputation(object):
         Return:
             mask_loss (Tensor): scalar tensor containing the loss
         """
+        #########################################################################zy debug
+        #import pdb
+        #pdb.set_trace()
+        #########################################################################
         labels, mask_targets = self.prepare_targets(proposals, targets)
 
         labels = cat(labels, dim=0)
@@ -122,10 +129,50 @@ class MaskRCNNLossComputation(object):
         if mask_targets.numel() == 0:
             return mask_logits.sum() * 0
 
-        mask_loss = F.binary_cross_entropy_with_logits(
+        mask_bce_loss = F.binary_cross_entropy_with_logits(
             mask_logits[positive_inds, labels_pos], mask_targets
         )
+
+        if self.use_dice_loss:
+            mask_dice_loss = binary_dice_loss_with_logits(
+                mask_logits[positive_inds, labels_pos], mask_targets
+            )
+            mask_loss = (1-self.dice_loss_rate) * mask_bce_loss + \
+                self.dice_loss_rate * mask_dice_loss
+        else:
+            mask_loss = mask_bce_loss
+
         return mask_loss
+
+def binary_dice_loss_with_logits(mask_logits, mask_targets):
+    r"""Function that measures Binary Dice Loss between target and output
+    logits.
+
+    Args:
+        mask_logits: Tensor of arbitrary shape
+        mask_targets: Tensor of the same shape as input
+
+    Examples::
+
+         >>> input = torch.randn(3, requires_grad=True)
+         >>> target = torch.empty(3).random_(2)
+         >>> loss = binary_dice_loss_with_logits(input, target)
+         >>> loss.backward()
+    """
+    #########################################################################zy debug
+    #import pdb
+    #pdb.set_trace()
+    #########################################################################
+    mask_logits = mask_logits.sigmoid()
+    if not (mask_logits.size() == mask_targets.size()):
+        raise ValueError("Mask_logits size ({}) must be the same as mask_targets size ({})".format(mask_logits.size(), mask_targets.size()))
+    if len(mask_logits.size()) == 3:
+        mask_logits = cat([mask_logits[i] for i in range(mask_logits.size()[0])],dim=0)
+        mask_targets = cat([mask_targets[i] for i in range(mask_targets.size()[0])],dim=0)
+    smooth = 1
+    intersection = (mask_logits.mul(mask_targets)).sum()
+    union = mask_logits.sum() + mask_targets.sum()
+    return 1 - (2. * intersection + smooth) / (union + smooth)
 
 
 def make_roi_mask_loss_evaluator(cfg):
@@ -136,7 +183,9 @@ def make_roi_mask_loss_evaluator(cfg):
     )
 
     loss_evaluator = MaskRCNNLossComputation(
-        matcher, cfg.MODEL.ROI_MASK_HEAD.RESOLUTION
+        matcher, cfg.MODEL.ROI_MASK_HEAD.RESOLUTION,
+        cfg.MODEL.ROI_MASK_HEAD.USE_DICE_LOSS,
+        cfg.MODEL.ROI_MASK_HEAD.DICE_LOSS_RATE
     )
 
     return loss_evaluator

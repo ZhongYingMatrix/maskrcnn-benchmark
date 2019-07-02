@@ -38,11 +38,13 @@ class Checkpointer(object):
 
         data = {}
         data["model"] = self.model.state_dict()
-        if self.optimizer is not None:
-            data["optimizer"] = self.optimizer.state_dict()
-        if self.scheduler is not None:
-            data["scheduler"] = self.scheduler.state_dict()
-        data.update(kwargs)
+        if 'only_model' not in kwargs:
+            #kwargs.pop('only_model')
+            if self.optimizer is not None:
+                data["optimizer"] = self.optimizer.state_dict()
+            if self.scheduler is not None:
+                data["scheduler"] = self.scheduler.state_dict()
+            data.update(kwargs)
 
         save_file = os.path.join(self.save_dir, "{}.pth".format(name))
         self.logger.info("Saving checkpoint to {}".format(save_file))
