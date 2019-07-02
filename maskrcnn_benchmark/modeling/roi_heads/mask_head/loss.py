@@ -43,7 +43,8 @@ def project_masks_on_boxes(segmentation_masks, proposals, discretization_size):
 
 
 class MaskRCNNLossComputation(object):
-    def __init__(self, proposal_matcher, discretization_size):
+    def __init__(self, proposal_matcher, discretization_size, 
+                 use_dice_loss, dice_loss_rate):
         """
         Arguments:
             proposal_matcher (Matcher)
@@ -51,6 +52,8 @@ class MaskRCNNLossComputation(object):
         """
         self.proposal_matcher = proposal_matcher
         self.discretization_size = discretization_size
+        self.use_dice_loss = use_dice_loss
+        self.dice_loss_rate = dice_loss_rate
 
     def match_targets_to_proposals(self, proposal, target):
         match_quality_matrix = boxlist_iou(target, proposal)
@@ -130,10 +133,14 @@ class MaskRCNNLossComputation(object):
             mask_logits[positive_inds, labels_pos], mask_targets
         )
 
-        mask_dice_loss = binary_dice_loss_with_logits(
-            mask_logits[positive_inds, labels_pos], mask_targets
-        )
-        mask_loss = 0.2 * mask_bce_loss + 0.8 * mask_dice_loss
+        if self.use_dice_loss:
+            mask_dice_loss = binary_dice_loss_with_logits(
+                mask_logits[positive_inds, labels_pos], mask_targets
+            )
+            mask_loss = (1-self.dice_loss_rate) * mask_bce_loss + \
+                self.dice_loss_rate * mask_dice_loss
+        else:
+            mask_loss = mask_bce_loss
 
         return mask_loss
 
@@ -176,7 +183,9 @@ def make_roi_mask_loss_evaluator(cfg):
     )
 
     loss_evaluator = MaskRCNNLossComputation(
-        matcher, cfg.MODEL.ROI_MASK_HEAD.RESOLUTION
+        matcher, cfg.MODEL.ROI_MASK_HEAD.RESOLUTION,
+        cfg.MODEL.ROI_MASK_HEAD.USE_DICE_LOSS,
+        cfg.MODEL.ROI_MASK_HEAD.DICE_LOSS_RATE
     )
 
     return loss_evaluator
