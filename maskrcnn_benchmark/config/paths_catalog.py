@@ -7,8 +7,13 @@ import os
 class DatasetCatalog(object):
     DATA_DIR = "datasets"
     DATASETS = {
-        "Signet_ring_cell": {
-            "data_dir": "Signet_ring_cell_dataset"
+        "Signet_ring_cell_train": {
+            "data_dir": "Signet_ring_cell_dataset",
+            "split": "train"
+        },
+        "Signet_ring_cell_test": {
+            "data_dir": "Signet_ring_cell_dataset",
+            "split": "test"
         },
         "coco_2017_train": {
             "img_dir": "coco/train2017",
@@ -138,7 +143,7 @@ class DatasetCatalog(object):
             attrs = DatasetCatalog.DATASETS[name]
             args = dict(
                 data_dir=os.path.join(data_dir, attrs["data_dir"]),
-                #split=attrs["split"],
+                split=attrs["split"],
             )
             return dict(
                 factory="SignetRingCellDataset",

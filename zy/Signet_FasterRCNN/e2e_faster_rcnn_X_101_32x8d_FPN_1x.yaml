@@ -24,14 +24,14 @@ MODEL:
     NUM_GROUPS: 32
     WIDTH_PER_GROUP: 8
 DATASETS:
-  TRAIN: ("Signet_ring_cell",)
-  #TEST: ("coco_2014_minival",)
+  TRAIN: ("Signet_ring_cell_train",)
+  TEST: ("Signet_ring_cell_test",)
 DATALOADER:
   SIZE_DIVISIBILITY: 32
 SOLVER:
   BASE_LR: 0.0025
   WEIGHT_DECAY: 0.0001
-  STEPS: (120000, 160000)
-  MAX_ITER: 180000
+  STEPS: (5000, 7500)
+  MAX_ITER: 10000
   IMS_PER_BATCH: 2
 OUTPUT_DIR: "/home/zhongying/reference/segment/maskrcnn-benchmark/zy/Signet_FasterRCNN"

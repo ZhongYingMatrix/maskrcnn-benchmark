@@ -21,14 +21,14 @@ class SignetRingCellDataset(torch.utils.data.Dataset):
         "ring_cell_cancer",
     )
 
-    def __init__(self, data_dir, use_difficult=False, transforms=None):
+    def __init__(self, data_dir, split, use_difficult=False, transforms=None):
         self.root = data_dir
         self.keep_difficult = use_difficult
         self.transforms = transforms
 
         self._annopath = os.path.join(self.root, "sig-train-pos", "%s.xml")
         self._imgpath = os.path.join(self.root, "sig-train-pos", "%s.jpeg")
-        self._imgsetpath = os.path.join(self.root, "pos.txt")
+        self._imgsetpath = os.path.join(self.root, "pos_" + split + ".txt")
 
         with open(self._imgsetpath) as f:
             self.ids = f.readlines()
