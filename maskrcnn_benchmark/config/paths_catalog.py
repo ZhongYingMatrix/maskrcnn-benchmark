@@ -15,6 +15,46 @@ class DatasetCatalog(object):
             "data_dir": "Signet_ring_cell_dataset",
             "split": "test"
         },
+        "Signet_ring_cell_train1": {
+            "data_dir": "Signet_ring_cell_dataset",
+            "split": "train1"
+        },
+        "Signet_ring_cell_test1": {
+            "data_dir": "Signet_ring_cell_dataset",
+            "split": "test1"
+        },
+        "Signet_ring_cell_train2": {
+            "data_dir": "Signet_ring_cell_dataset",
+            "split": "train2"
+        },
+        "Signet_ring_cell_test2": {
+            "data_dir": "Signet_ring_cell_dataset",
+            "split": "test2"
+        },
+        "Signet_ring_cell_train3": {
+            "data_dir": "Signet_ring_cell_dataset",
+            "split": "train3"
+        },
+        "Signet_ring_cell_test3": {
+            "data_dir": "Signet_ring_cell_dataset",
+            "split": "test3"
+        },
+        "Signet_ring_cell_train4": {
+            "data_dir": "Signet_ring_cell_dataset",
+            "split": "train4"
+        },
+        "Signet_ring_cell_test4": {
+            "data_dir": "Signet_ring_cell_dataset",
+            "split": "test4"
+        },
+        "Signet_ring_cell_train5": {
+            "data_dir": "Signet_ring_cell_dataset",
+            "split": "train5"
+        },
+        "Signet_ring_cell_test5": {
+            "data_dir": "Signet_ring_cell_dataset",
+            "split": "test5"
+        },
         "coco_2017_train": {
             "img_dir": "coco/train2017",
             "ann_file": "coco/annotations/instances_train2017.json"

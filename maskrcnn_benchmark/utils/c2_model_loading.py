@@ -178,7 +178,7 @@ _C2_STAGE_NAMES = {
 
 C2_FORMAT_LOADER = Registry()
 
-
+@C2_FORMAT_LOADER.register("R-50-C1")
 @C2_FORMAT_LOADER.register("R-50-C4")
 @C2_FORMAT_LOADER.register("R-50-C5")
 @C2_FORMAT_LOADER.register("R-101-C4")
@@ -191,7 +191,7 @@ C2_FORMAT_LOADER = Registry()
 def load_resnet_c2_format(cfg, f):
     state_dict = _load_c2_pickled_weights(f)
     conv_body = cfg.MODEL.BACKBONE.CONV_BODY
-    arch = conv_body.replace("-C4", "").replace("-C5", "").replace("-FPN", "")
+    arch = conv_body.replace("-C4", "").replace("-C5", "").replace("-FPN", "").replace("-C1", "")
     arch = arch.replace("-RETINANET", "")
     stages = _C2_STAGE_NAMES[arch]
     state_dict = _rename_weights_for_resnet(state_dict, stages)

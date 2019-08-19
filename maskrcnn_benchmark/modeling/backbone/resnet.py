@@ -42,6 +42,12 @@ StageSpec = namedtuple(
 # -----------------------------------------------------------------------------
 # Standard ResNet models
 # -----------------------------------------------------------------------------
+
+# ResNet-50 up to stage 4 (excludes stage 5)
+ResNet50StagesTo1 = tuple(
+    StageSpec(index=i, block_count=c, return_features=r)
+    for (i, c, r) in ((1, 3, True), )
+)
 # ResNet-50 (including all stages)
 ResNet50StagesTo5 = tuple(
     StageSpec(index=i, block_count=c, return_features=r)
@@ -439,6 +445,7 @@ _STEM_MODULES = Registry({
 })
 
 _STAGE_SPECS = Registry({
+    "R-50-C1": ResNet50StagesTo1,
     "R-50-C4": ResNet50StagesTo4,
     "R-50-C5": ResNet50StagesTo5,
     "R-101-C4": ResNet101StagesTo4,

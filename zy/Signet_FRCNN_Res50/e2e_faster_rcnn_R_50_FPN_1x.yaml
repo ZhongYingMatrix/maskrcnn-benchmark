@@ -1,8 +1,10 @@
 MODEL:
   META_ARCHITECTURE: "GeneralizedRCNN"
-  WEIGHT: "catalog://ImageNetPretrained/FAIR/20171220/X-101-32x8d"
+  WEIGHT: "catalog://ImageNetPretrained/MSRA/R-50"
   BACKBONE:
-    CONV_BODY: "R-101-FPN"
+    CONV_BODY: "R-50-FPN"
+  RESNETS:
+    BACKBONE_OUT_CHANNELS: 256
   RPN:
     USE_FPN: True
     ANCHOR_STRIDE: (4, 8, 16, 32, 64)
@@ -18,11 +20,6 @@ MODEL:
     POOLER_SAMPLING_RATIO: 2
     FEATURE_EXTRACTOR: "FPN2MLPFeatureExtractor"
     PREDICTOR: "FPNPredictor"
-  RESNETS:
-    BACKBONE_OUT_CHANNELS: 256
-    STRIDE_IN_1X1: False
-    NUM_GROUPS: 32
-    WIDTH_PER_GROUP: 8
 DATASETS:
   TRAIN: ("Signet_ring_cell_train1",)
   TEST: ("Signet_ring_cell_test1",)
@@ -37,4 +34,4 @@ SOLVER:
   IMS_PER_BATCH: 4
 TEST:
   IMS_PER_BATCH: 4
-OUTPUT_DIR: "/home/zhongying/reference/segment/maskrcnn-benchmark/zy/Signet_FasterRCNN"
+OUTPUT_DIR: "/home/zhongying/reference/segment/maskrcnn-benchmark/zy/Signet_FRCNN_Res50"
