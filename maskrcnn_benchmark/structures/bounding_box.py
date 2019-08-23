@@ -164,32 +164,42 @@ class BoxList(object):
             bbox.add_field(k, v)
         return bbox.convert(self.mode)
 
-    def crop(self, box):
+    def crop(self, box, keep_threshold=0.7):
         """
         Cropss a rectangular region from this bounding box. The box is a
         4-tuple defining the left, upper, right, and lower pixel
         coordinate.
         """
         xmin, ymin, xmax, ymax = self._split_into_xyxy()
-        w, h = box[2] - box[0], box[3] - box[1]
-        cropped_xmin = (xmin - box[0]).clamp(min=0, max=w)
-        cropped_ymin = (ymin - box[1]).clamp(min=0, max=h)
-        cropped_xmax = (xmax - box[0]).clamp(min=0, max=w)
-        cropped_ymax = (ymax - box[1]).clamp(min=0, max=h)
-
-        # TODO should I filter empty boxes here?
-        if False:
-            is_empty = (cropped_xmin == cropped_xmax) | (cropped_ymin == cropped_ymax)
+        w, h = box[2] - box[0] + 1, box[3] - box[1] + 1
+        cropped_xmin = (xmin - box[0]).clamp(min=0, max=w-1)
+        cropped_ymin = (ymin - box[1]).clamp(min=0, max=h-1)
+        cropped_xmax = (xmax - box[0]).clamp(min=0, max=w-1)
+        cropped_ymax = (ymax - box[1]).clamp(min=0, max=h-1)
 
         cropped_box = torch.cat(
             (cropped_xmin, cropped_ymin, cropped_xmax, cropped_ymax), dim=-1
         )
+
+        # filter done by zy
+        is_empty = (cropped_xmin == cropped_xmax) | (cropped_ymin == cropped_ymax)
+        x_overlap = (xmax-xmin+box[2]-box[0]-xmax.clamp(min=box[2])+xmin.clamp(max=box[0])).clamp(min=0)
+        y_overlap = (ymax-ymin+box[3]-box[1]-ymax.clamp(min=box[3])+ymin.clamp(max=box[1])).clamp(min=0)
+        less_than_threshold =  x_overlap * y_overlap / ((xmax-xmin)*(ymax-ymin)) < keep_threshold
+        keep_mask = torch.t(1-(is_empty|less_than_threshold))[0]
+        cropped_box=cropped_box[keep_mask]
+
         bbox = BoxList(cropped_box, (w, h), mode="xyxy")
         # bbox._copy_extra_fields(self)
         for k, v in self.extra_fields.items():
             if not isinstance(v, torch.Tensor):
                 v = v.crop(box)
+            else:
+                v = v[keep_mask]
             bbox.add_field(k, v)
+        bbox.add_field('origin_size', torch.Tensor(self.size))
+        bbox.add_field('crop_box', torch.Tensor(box))
+        
         return bbox.convert(self.mode)
 
     # Tensor-like methods

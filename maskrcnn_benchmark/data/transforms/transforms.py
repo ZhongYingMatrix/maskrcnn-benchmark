@@ -62,6 +62,27 @@ class Resize(object):
         target = target.resize(image.size)
         return image, target
 
+class RandomCrop(object):
+    def __init__(self, crop_w, crop_h, keep_threshold=0.7):
+        self.crop_w = crop_w
+        self.crop_h = crop_h
+        self.keep_threshold = keep_threshold
+
+    def __call__(self, image, target=None):
+        if self.crop_w > image.size[0] or self.crop_h > image.size[1]:
+            raise ValueError(
+                "Cropping larger img from origin img"
+            )
+        xmin = random.randint(0,image.size[0]-self.crop_w) 
+        ymin = random.randint(0,image.size[1]-self.crop_h)
+        xmax, ymax = xmin+self.crop_w-1, ymin+self.crop_h-1
+        image = F.crop(image, ymin, xmin, self.crop_h, self.crop_w)
+        if target is None:
+            return image
+        target = target.crop((xmin, ymin, xmax, ymax), keep_threshold=self.keep_threshold)
+        return image, target
+
+
 
 class RandomHorizontalFlip(object):
     def __init__(self, prob=0.5):

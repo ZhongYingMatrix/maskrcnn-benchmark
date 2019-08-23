@@ -62,6 +62,12 @@ _C.INPUT.HUE = 0.0
 
 _C.INPUT.VERTICAL_FLIP_PROB_TRAIN = 0.0
 
+# Image Cropping
+_C.INPUT.CROP_TO_SIZE = False
+_C.INPUT.CROP_KEEP_THRESHOLD = 0.7
+_C.INPUT.CROP_W = 1333
+_C.INPUT.CROP_H = 1333
+
 # -----------------------------------------------------------------------------
 # Dataset
 # -----------------------------------------------------------------------------

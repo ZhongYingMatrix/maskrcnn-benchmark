@@ -33,10 +33,15 @@ def build_transforms(cfg, is_train=True):
         hue=hue,
     )
 
+    crop = cfg.INPUT.CROP_TO_SIZE
+    keep_threshold = cfg.INPUT.CROP_KEEP_THRESHOLD
+    crop_w = cfg.INPUT.CROP_W
+    crop_h = cfg.INPUT.CROP_H
+
     transform = T.Compose(
         [
             color_jitter,
-            T.Resize(min_size, max_size),
+            T.Resize(min_size, max_size) if not crop else T.RandomCrop(crop_w, crop_h, keep_threshold=keep_threshold),
             T.RandomHorizontalFlip(flip_horizontal_prob),
             T.RandomVerticalFlip(flip_vertical_prob),
             T.ToTensor(),
