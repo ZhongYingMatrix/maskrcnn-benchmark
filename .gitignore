@@ -35,5 +35,6 @@ dist/
 /datasets
 /models
 /output
-/zy/**/inference
-/zy/**/set*
+/zy
+#/**/inference
+#/zy/**/set*
