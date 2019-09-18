@@ -7,6 +7,26 @@ import os
 class DatasetCatalog(object):
     DATA_DIR = "datasets"
     DATASETS = {
+        "ODIR_train_left": {
+            "data_dir": "ODIR-5K_training",
+            "split": "train",
+            "orientation": "left"
+        },
+        "ODIR_train_right": {
+            "data_dir": "ODIR-5K_training",
+            "split": "train",
+            "orientation": "right"
+        },
+        "ODIR_test_left": {
+            "data_dir": "ODIR-5K_training",
+            "split": "test",
+            "orientation": "left"
+        },
+        "ODIR_test_right": {
+            "data_dir": "ODIR-5K_training",
+            "split": "test",
+            "orientation": "right"
+        },
         "Signet_ring_cell_train": {
             "data_dir": "Signet_ring_cell_dataset",
             "split": "train"
@@ -187,6 +207,18 @@ class DatasetCatalog(object):
             )
             return dict(
                 factory="SignetRingCellDataset",
+                args=args,
+            )
+        elif "ODIR" in name:
+            data_dir = DatasetCatalog.DATA_DIR
+            attrs = DatasetCatalog.DATASETS[name]
+            args = dict(
+                data_dir=os.path.join(data_dir, attrs["data_dir"]),
+                split=attrs["split"],
+                orientation=attrs["orientation"]
+            )
+            return dict(
+                factory="ODIRDataset",
                 args=args,
             )
         raise RuntimeError("Dataset not available: {}".format(name))
