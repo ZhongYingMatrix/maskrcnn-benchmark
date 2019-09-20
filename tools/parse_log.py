@@ -3,6 +3,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from collections import defaultdict
 
+def np_move_avg(a,n,mode="valid"):
+    return(np.convolve(a, np.ones((n,))/n, mode=mode))
+
+
 def get_log(args):
     #itr, loss, loss_c, loss_br, loss_m, loss_o, loss_rbr=[], [], [], [], [], [], []
     log_dict = defaultdict(list)
@@ -64,6 +68,10 @@ if __name__ == '__main__':
         if loss != 'iter:':
             plt.figure(i)
             plt.plot(log_dict['iter:'], log_dict[loss], linewidth=1)
+            if 'smooth' not in loss:
+                origin_curve = np.array(log_dict[loss])
+                filted_curve = np_move_avg(origin_curve, 20).tolist()
+                plt.plot(log_dict['iter:'][:len(filted_curve)], filted_curve, color='red', linewidth=2)
             plt.xlabel('iteration')
             plt.ylabel(loss)
             plt.xlim(xmin=100)

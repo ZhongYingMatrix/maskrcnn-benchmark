@@ -49,7 +49,12 @@ class ClassifierModule(torch.nn.Module):
             assert len(output) == len(targets), 'Length of result %d and targets %d must be equal' %(len(output), len(targets))
             loss = []
             for o, target in zip(output,targets):
-                loss.append(self.loss(o, self._prepare_target(target)))
+                #loss.append(self.loss(o, self._prepare_target(target)))
+                pos, neg = (target==1).float(), (target==0).float()
+                pos, neg = pos*4/sum(pos), neg*4/sum(neg)
+                w = pos + neg
+                #assert sum(w) == 8, 'sum(w) must be 8, get %f'%sum(w)
+                loss.append(F.binary_cross_entropy(o, target, weight=w))
             classifier_losses['classifier_losses'] = sum(loss)/len(loss)
 
         return output, classifier_losses
